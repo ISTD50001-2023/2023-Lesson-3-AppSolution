@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
     ImageView imageViewComic;
 
     String comicNo;
-    public static final String TAG = "Logcat";
+    public static final String TAG = "MyLog";
     final String ERROR_NO_NETWORK = "No Network";
     final String ERROR_NOT_VALID = "Comic No Not Valid";
     final String ERROR_MALFORMED_URL = "Malformed URL";
@@ -58,12 +58,4 @@ public class MainActivity extends AppCompatActivity {
         final Handler handler = new Handler(Looper.getMainLooper());
     }
 
-    class Container<T> {
-        T value;
-        Container() {
-            this.value = null;
-        }
-        void set(T x) { this.value = x; }
-        T get() { return this.value; }
-    }
 }
