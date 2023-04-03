@@ -1,14 +1,21 @@
 package com.example.norman_lee.comicapp;
 
+import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import org.json.JSONException;
+
+import java.io.IOException;
+import java.net.URL;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -36,6 +43,24 @@ public class MainActivity extends AppCompatActivity {
         //TODO 6.1 Ensure that Android Manifest has permissions for internet and has orientation fixed
         //TODO 6.2 Get references to widgets
         //TODO 6.3 Set up setOnClickListener for the button
+        editTextComicNo = findViewById(R.id.editTextComicNo);
+        buttonGetComic = findViewById(R.id.buttonGetComic);
+        textViewTitle = findViewById(R.id.textViewTitle);
+        imageViewComic = findViewById(R.id.imageViewComic);
+
+        buttonGetComic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String comicNumber = editTextComicNo.getText().toString();
+                if ( Utils.isNetworkAvailable(MainActivity.this)){
+                    getComic(comicNumber); // complete getComic VVVVVVVVV
+                }else{
+                    Toast.makeText(MainActivity.this, ERROR_NO_NETWORK,
+                            Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
 
         //TODO 6.4 Retrieve the user input from the EditText
         //TODO 6.5 - 6.9 Modify getComic below
@@ -56,6 +81,46 @@ public class MainActivity extends AppCompatActivity {
     void getComic(final String userInput) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         final Handler handler = new Handler(Looper.getMainLooper());
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                // YOU ARE IN BACKGROUND THREAD
+                /* Bitmap is Android's class to store images */
+                Container<Bitmap> bitmapContainer = new Container<Bitmap>();
+                try {
+                    String urlString = Utils.getImageURLFromXkcdApi(userInput);
+                    URL imageURL = new URL(urlString);
+                    Bitmap bitmap = Utils.getBitmap(imageURL);
+                    bitmapContainer.set(bitmap);
+
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            // YOU ARE IN THE UI (MAIN) THREAD
+                            imageViewComic.setImageBitmap( bitmapContainer.get() );
+                        }
+                    });
+
+                } catch (IOException e) {
+                    e.printStackTrace(); // Display a toast
+                } catch (JSONException e) {
+                    e.printStackTrace(); // Display a toast
+                }
+
+            }
+        });
+    }
+
+    final static class Container<T>{
+
+        private T t;
+
+        T get(){
+            return t;
+        }
+        void set(T t ){
+            this.t = t;
+        }
     }
 
 }

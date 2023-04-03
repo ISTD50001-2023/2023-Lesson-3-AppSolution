@@ -43,20 +43,26 @@ public abstract class BackgroundTask <I, O> {
     public void start(final I userInput) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         final Handler handler = new Handler(Looper.getMainLooper());
-
-        final Container<O> container = new Container<>();
-        O o = task(userInput);
-        container.set(o);
-
-        handler.post(new Runnable() {
+        executor.execute(new Runnable() {
             @Override
             public void run() {
-                O o = container.get();
-                if( o != null){
-                    done(o);
-                }
+                final Container<O> container = new Container<>();
+                O o = task(userInput);
+                container.set(o);
+
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        O o = container.get();
+                        if( o != null){
+                            done(o);
+                        }
+                    }
+                });
             }
         });
+
+
 
     }
 
